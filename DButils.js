@@ -27,9 +27,9 @@ pool.on('error', function (err) {
 console.log('*** pool connection on ***');
 
 exports.execQuery = (query) => {
-    // console.log('********************************** QUERY **************************************')
-    // console.log(query);
-    // console.log('*******************************************************************************')
+    console.log('********************************** QUERY **************************************')
+    console.log(query);
+    console.log('*******************************************************************************')
     return new Promise(function (resolve, reject) {
         try {
             var ans = [];
@@ -70,9 +70,9 @@ exports.execQuery = (query) => {
 
                 dbReq.on('requestCompleted', function () {
                     console.log('request Completed: ' + dbReq.rowCount + ' row(s) returned');
-                    console.log('____________ DB ANS ____________');
+                    //console.log('____________ DB ANS ____________');
                     //console.log(ans);
-                    console.log('________________________________');
+                    //console.log('________________________________');
                     connection.release();
                     resolve(ans);
 

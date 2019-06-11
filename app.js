@@ -4,6 +4,7 @@ var DButilsAzure = require('./DButils');
 var jwt = require('jsonwebtoken');
 let config = require('./config');
 var xml2js = require('xml2js');
+var cors = require('cors')
 var xmlParser = new xml2js.Parser();
 var fs = require('fs');
 
@@ -11,6 +12,7 @@ var port = 3000;
 var countries = [];
 
 var app = express();
+app.use(cors());
 
 fs.readFile(__dirname + '/countries.xml', (err, data) => {
     xmlParser.parseString(data, (err, result) => {
@@ -213,7 +215,7 @@ app.get('/guest/randExplorePOIs/:minRating', (req, res) => {
         return res.sendStatus(400);
     }
     DButilsAzure.execQuery(`
-        SELECT * FROM dbo.PointsOfInterest INNER JOIN dbo.POIreviews
+        SELECT * FROM dbo.PointsOfInterest LEFT JOIN dbo.POIreviews
         ON PointsOfInterest.name=POIreviews.FK_poi_name
         WHERE PointsOfInterest.poiRank >= ${minRating}
         `)
@@ -247,6 +249,7 @@ app.get('/guest/randExplorePOIs/:minRating', (req, res) => {
                         });
                     }
                 })
+                //decodeBase64toBinary(poi[0].picture, poi[0].name);
                 if (poi.length === 3) {
                     res.status(200).json(poi);
                 } else {
@@ -266,6 +269,7 @@ app.get('/guest/randExplorePOIs/:minRating', (req, res) => {
                             randAns[2] = poi[i];
                         }
                     }
+                    //console.log(randAns);
                     res.status(200).json(randAns);
                 }
             }
