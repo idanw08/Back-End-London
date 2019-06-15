@@ -156,7 +156,7 @@ app.post('/auth/register', (req, res) => {
             '${newUser.categories[2]}', '${newUser.categories[3]}');
     `)
         .then(result => {
-            console.log('result',result)
+            console.log('result', result)
             res.json({ ans: true })
         })
         .catch(error => {
@@ -165,44 +165,84 @@ app.post('/auth/register', (req, res) => {
         })
 });
 
-// 3
-app.post('/auth/passwordRecovery', verifyToken, (req, res) => {
-    jwt.verify(req.token, config.secret, (err, authData) => {
-        if (err || authData.user.username !== req.body.username) {
-            res.sendStatus(401);
-        } else {
-            var ques = req.body.question;
-            var ans = req.body.answer.toLowerCase();
-
-            var questions = ['momOriginLastName', 'elementarySchoolName', 'favouriteColor', 'childhoodBFF'];
-            if (ques === "" || ans === "" || !questions.includes(ques)) {
-                return res.sendStatus(400);
+// 3.1
+app.post('/auth/recoveryQuestions', (req, res) => {
+    console.log(req.body.username)
+    if (!req.body.username || req.body.username === "") {
+        res.json({ 'message': 'Enter Username' })
+        return
+    }
+    DButilsAzure.execQuery(`SELECT * FROM dbo.Users WHERE username='${req.body.username}';`)
+        .then((result) => {
+            if (result.length === 0) {
+                json({ 'message': 'User does not exist. Please register.' })
+                return
             }
-            console.log(ques + ' --> ' + ans);
-            DButilsAzure.execQuery(`SELECT password,${ques} FROM dbo.Users WHERE username='${authData.user.username}';`)
-                .then(result => {
-                    var correctAns = false;
-                    switch (ques) {
-                        case 'momOriginLastName':
-                            correctAns = result[0].momOriginLastName === ans ? true : false;
-                            break;
-                        case 'elementarySchoolName':
-                            correctAns = result[0].elementarySchoolName === ans ? true : false;
-                            break;
-                        case 'favouriteColor':
-                            correctAns = result[0].favouriteColor === ans ? true : false;
-                            break;
-                        case 'childhoodBFF':
-                            correctAns = result[0].childhoodBFF === ans ? true : false;
-                            break;
-                    }
-                    if (correctAns) {
-                        res.status(200).json({ password: result[0].password })
-                    } else { res.sendStatus(401); }
-                })
-                .catch(error => res.send(error));
-        }
-    })
+            let q = []
+            if (result[0].momOriginLastName !== '') q.push({
+                question: 'momOriginLastName',
+                answer: result[0].momOriginLastName
+            })
+            if (result[0].elementarySchoolName !== '') q.push({
+                question: 'elementarySchoolName',
+                answer: result[0].elementarySchoolName
+            })
+            if (result[0].favouriteColor !== '') q.push({
+                question: 'favouriteColor',
+                answer: result[0].favouriteColor
+            })
+            if (result[0].childhoodBFF !== '') q.push({
+                question: 'childhoodBFF',
+                answer: result[0].childhoodBFF
+            })
+
+            let rndIdx = Math.floor(Math.random() * Math.floor(q.length))
+            res.json(q[rndIdx])
+        })
+        .catch((error) => {
+            res.json({ 'message': 'username not found' })
+        })
+})
+
+// 3.2
+app.post('/auth/passwordRecovery', (req, res) => {
+    if (!req.body.username || !req.body.question || !req.body.answer) {
+        return res.sendStatus(400)
+    }
+    if (req.body.username === '' || req.body.question === '' || req.body.answer === '') {
+        return res.sendStatus(400)
+    }
+    
+    var ques = req.body.question;
+    var ans = req.body.answer.toLowerCase();
+
+    var questions = ['momOriginLastName', 'elementarySchoolName', 'favouriteColor', 'childhoodBFF'];
+    if (ques === "" || ans === "" || !questions.includes(ques)) {
+        return res.sendStatus(400);
+    }
+    console.log(ques + ' --> ' + ans);
+    DButilsAzure.execQuery(`SELECT password,${ques} FROM dbo.Users WHERE username='${req.body.username}';`)
+        .then(result => {
+            var correctAns = false;
+            switch (ques) {
+                case 'momOriginLastName':
+                    correctAns = result[0].momOriginLastName === ans ? true : false;
+                    break;
+                case 'elementarySchoolName':
+                    correctAns = result[0].elementarySchoolName === ans ? true : false;
+                    break;
+                case 'favouriteColor':
+                    correctAns = result[0].favouriteColor === ans ? true : false;
+                    break;
+                case 'childhoodBFF':
+                    correctAns = result[0].childhoodBFF === ans ? true : false;
+                    break;
+            }
+            if (correctAns) {
+                res.status(200).json({ password: result[0].password })
+            } else { res.sendStatus(401); }
+        })
+        .catch(error => res.send(error));
 });
 
 // 4
