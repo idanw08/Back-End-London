@@ -156,11 +156,13 @@ app.post('/auth/register', (req, res) => {
             '${newUser.categories[2]}', '${newUser.categories[3]}');
     `)
         .then(result => {
-            if (result.length === 0) {
-                res.status(200).json({ ans: true });
-            }
+            console.log('result',result)
+            res.json({ ans: true })
         })
-        .catch(res.status(400).json({ ans: false }))
+        .catch(error => {
+            console.log(error)
+            res.json({ ans: false })
+        })
 });
 
 // 3

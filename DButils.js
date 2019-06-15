@@ -27,9 +27,9 @@ pool.on('error', function (err) {
 console.log('*** pool connection on ***');
 
 exports.execQuery = (query) => {
-    console.log('********************************** QUERY **************************************')
-    console.log(query);
-    console.log('*******************************************************************************')
+    // console.log('********************************** QUERY **************************************')
+    // console.log(query);
+    // console.log('*******************************************************************************')
     return new Promise(function (resolve, reject) {
         try {
             var ans = [];

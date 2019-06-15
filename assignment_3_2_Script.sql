@@ -18,7 +18,7 @@
 --DELETE FROM dbo.Users WHERE username='edanbi'
 
 --INSERT INTO Users (username, password, firstName, lastName, city, country, email, recoveryQuestions, recoveryAnswers)
---VALUES ('edanbi', '123456', 'Edan', 'Ben Ivri', 'Or Yehuda', 'Israel', 'idan.ivri@gmail.com', 'mom last name?', 'Lev');
+--VALUES ('admin', '123456', 'Edan', 'Ben Ivri', 'Or Yehuda', 'Israel', 'idan.ivri@gmail.com', 'mom last name?', 'Lev');
 
 --INSERT INTO Categories (FK_Username, Food, Culture, Shopping, Night_Life)
 --VALUES ('edanbi',1, 0, 0, 1)
@@ -231,11 +231,14 @@
 
 --delete from PointsOfInterest where numViews=0
 
+--delete from UsersCategories where Food=0 OR Food=1
+--delete from Users where firstName like '%'
+
 --ALTER TABLE PointsOfInterest ALTER COLUMN picture varchar(4096);
 
 --SELECT * FROM dbo.UsersFavouritesPOI;
 --SELECT * FROM dbo.UsersCategories
 --SELECT * FROM dbo.POIreviews
---SELECT * FROM dbo.Users
-SELECT * FROM dbo.PointsOfInterest 
+SELECT * FROM dbo.Users
+--SELECT * FROM dbo.PointsOfInterest 
 --SELECT * FROM dbo.PointsOfInterest LEFT JOIN POIreviews ON PointsOfInterest.name=POIreviews.FK_poi_name
