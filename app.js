@@ -57,7 +57,8 @@ app.post('/auth/login', (req, res) => {
     }
     DButilsAzure.execQuery(`SELECT * FROM dbo.Users WHERE username='${user.username}' AND password='${user.password}';`)
         .then(result => {
-            if (result.length === 1) {
+            const correctDetails = (result[0].username===req.body.username) && (result[0].password === req.body.password)
+            if (result.length === 1 && correctDetails) {
                 jwt.sign({ user }, config.secret, { expiresIn: '24h' }, (err, token) => {
                     res.json({ token })
                 })
@@ -212,7 +213,7 @@ app.post('/auth/passwordRecovery', (req, res) => {
     if (req.body.username === '' || req.body.question === '' || req.body.answer === '') {
         return res.sendStatus(400)
     }
-    
+
     var ques = req.body.question;
     var ans = req.body.answer.toLowerCase();
 
@@ -497,10 +498,12 @@ app.get('/user/poi/getAll_POI', (req, res) => {
 // 8
 app.delete('/user/poi/removeFavouritePOI', verifyToken, (req, res) => {
     if (req.body.username === undefined || req.body.poi_name === undefined) {
+        console.log('1')
         return res.sendStatus(400);
     }
     jwt.verify(req.token, config.secret, (err, authData) => {
         if (err || req.body.username !== authData.user.username) {
+            console.log('2')
             res.status(403).json({ message: "illegal token." });
         } else {
             DButilsAzure.execQuery(`
@@ -509,6 +512,7 @@ app.delete('/user/poi/removeFavouritePOI', verifyToken, (req, res) => {
                 SELECT @@ROWCOUNT AS changed;
             `).then(result => {
                 var ans = !(result[0].changed === 0);
+                console.log('3')
                 res.status(200).json({ ans: ans });
             })
         }
@@ -535,54 +539,70 @@ app.get('/user/getUserFavourites/:username', verifyToken, (req, res) => {
             res.status(403).json({ message: "illegal token." });
         } else {
             DButilsAzure.execQuery(`
-                SELECT FK_poi_name FROM dbo.UsersFavouritesPOI
+                SELECT * FROM dbo.UsersFavouritesPOI
                 WHERE FK_username='${req.params.username}'
                 ORDER BY _priority ASC;
             `)
                 .then(result => {
                     if (result.length === 0) {
-                        res.json({ message: `Username '${req.params.username}' does not exist` })
+                        res.json({ message: 'No Favourites' })
                     } else {
-                        var poiNames = [];
+                        var favs = [];
                         result.forEach(row => {
-                            poiNames.push(row.FK_poi_name);
+                            favs.push(row);
                         })
-                        return poiNames;
+                        res.json(favs);
                     }
                 })
-                .then(names => {
-                    var ans = [];
-                    var i = 0, len = names.length;
-                    names.forEach(name => {
-                        DButilsAzure.execQuery(`
-                            SELECT * FROM dbo.PointsOfInterest WHERE name='${name}';
-                            SELECT review_content, rankVal FROM dbo.POIreviews WHERE FK_poi_name='${name}';
-                            `)
-                            .then(result => {
-                                console.log(result);
-                                var poi = {
-                                    name: result[0].name,
-                                    picture: result[0].picture,
-                                    numViews: result[0].numViews,
-                                    poiDescription: result[0].poiDescription,
-                                    poiRank: result[0].poiRank,
-                                    category: result[0].category,
-                                    reviews: []
-                                };
-                                for (let i = 1; i < result.length; i++) {
-                                    poi.reviews.push({
-                                        review_content: result[i].name,
-                                        rankVal: result[i].picture
-                                    });
-                                }
-                                ans.push(poi);
-                                i++;
-                                if (i === len) {
-                                    res.json(ans);
-                                }
-                            })
-                    })
-                })
+            // DButilsAzure.execQuery(`
+            //     SELECT FK_poi_name FROM dbo.UsersFavouritesPOI
+            //     WHERE FK_username='${req.params.username}'
+            //     ORDER BY _priority ASC;
+            // `)
+            //     .then(result => {
+            //         if (result.length === 0) {
+            //             res.json({ message: `Username '${req.params.username}' does not exist` })
+            //         } else {
+            //             var poiNames = [];
+            //             result.forEach(row => {
+            //                 poiNames.push(row.FK_poi_name);
+            //             })
+            //             return poiNames;
+            //         }
+            //     })
+            // .then(names => {
+            //     var ans = [];
+            //     var i = 0, len = names.length;
+            //     names.forEach(name => {
+            //         DButilsAzure.execQuery(`
+            //             SELECT * FROM dbo.PointsOfInterest WHERE name='${name}';
+            //             SELECT review_content, rankVal FROM dbo.POIreviews WHERE FK_poi_name='${name}';
+            //             `)
+            //             .then(result => {
+            //                 console.log(result);
+            //                 var poi = {
+            //                     name: result[0].name,
+            //                     picture: result[0].picture,
+            //                     numViews: result[0].numViews,
+            //                     poiDescription: result[0].poiDescription,
+            //                     poiRank: result[0].poiRank,
+            //                     category: result[0].category,
+            //                     reviews: []
+            //                 };
+            //                 for (let i = 1; i < result.length; i++) {
+            //                     poi.reviews.push({
+            //                         review_content: result[i].name,
+            //                         rankVal: result[i].picture
+            //                     });
+            //                 }
+            //                 ans.push(poi);
+            //                 i++;
+            //                 if (i === len) {
+            //                     res.json(ans);
+            //                 }
+            //             })
+            //     })
+            // })
         }
     })
 });
