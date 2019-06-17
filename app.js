@@ -529,7 +529,7 @@ app.get('/user/getFavouritesNum/:username', verifyToken, (req, res) => {
 });
 
 // 10
-app.get('/user/poi/getUserFavourites/:username', verifyToken, (req, res) => {
+app.get('/user/getUserFavourites/:username', verifyToken, (req, res) => {
     jwt.verify(req.token, config.secret, (err, authData) => {
         if (err || req.params.username !== authData.user.username) {
             res.status(403).json({ message: "illegal token." });
