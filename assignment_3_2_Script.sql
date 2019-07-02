@@ -236,8 +236,14 @@
 
 --ALTER TABLE PointsOfInterest ALTER COLUMN picture varchar(4096);
 
---SELECT * FROM dbo.UsersFavouritesPOI;
---SELECT * FROM dbo.UsersCategories
+--delete from UsersFavouritesPOI where _priority=1
+
+--update users set country='August', email='admin@admin' where username='a'
+--update UsersCategories set Food=0, Culture=0 where FK_username='a'
+
+
+SELECT * FROM dbo.UsersFavouritesPOI;
+SELECT * FROM dbo.UsersCategories
 --SELECT * FROM dbo.POIreviews
 SELECT * FROM dbo.Users
 --SELECT * FROM dbo.PointsOfInterest 
