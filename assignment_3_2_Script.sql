@@ -243,7 +243,7 @@
 
 
 SELECT * FROM dbo.UsersFavouritesPOI;
-SELECT * FROM dbo.UsersCategories
+--SELECT * FROM dbo.UsersCategories
 --SELECT * FROM dbo.POIreviews
 SELECT * FROM dbo.Users
 --SELECT * FROM dbo.PointsOfInterest 
